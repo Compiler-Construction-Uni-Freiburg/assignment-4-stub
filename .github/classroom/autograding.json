@@ -2,7 +2,7 @@
   "tests": [
     {
       "name": "Compiler Tests",
-      "setup": "sudo apt install software-properties-common -y && sudo add-apt-repository ppa:deadsnakes/ppa -y && sudo apt install python3.10 && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10 && pip3.10 install -r requirements.txt && git clone https://github.com/Compiler-Construction-Uni-Freiburg/compiler-tests && cd compiler-tests && gcc -c -g -std=c99 runtime.c",
+      "setup": "sudo apt install software-properties-common -y && sudo add-apt-repository ppa:deadsnakes/ppa -y && sudo apt install -y python3.10 python3.10-distutils python3.10-apt && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10 && pip3.10 install -r requirements.txt && git clone https://github.com/Compiler-Construction-Uni-Freiburg/compiler-tests && cd compiler-tests && gcc -c -g -std=c99 runtime.c",
       "run": "cd compiler-tests && python3.10 run-tests.py",
       "input": "",
       "output": "ALL TESTS PASSED! :D",
