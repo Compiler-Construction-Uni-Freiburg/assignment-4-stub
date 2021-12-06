@@ -6,7 +6,7 @@ import os
 from typing import Set
 from dataclasses import dataclass, field
 import platform
-from register_allocation import color_graph, build_interference, color_to_register, callee_saved_registers, uncover_live_blocks
+from register_allocation import color_graph, build_interference, color_to_register, callee_saved_registers
 from pprint import pprint
 
 Binding = tuple[Name, expr]
