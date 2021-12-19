@@ -290,18 +290,23 @@ class Compiler:
     # Assign Homes
     ############################################################################
 
-    def assign_homes_arg(self, a: arg, home: dict[Variable, arg]) -> arg:
+    def assign_homes_arg(self, a: arg, home: dict[Variable, arg]) -> arg|None:
         match a:
             case Variable(_):
-                return home[a]
+                if a in home:
+                    return home[a]
+                return None
             case _:
                 return a
 
-    def assign_homes_instr(self, i: instr, home: dict[Variable, arg]) -> instr:
+    def assign_homes_instr(self, i: instr, home: dict[Variable, arg]) -> instr|None:
         match i:
             case Instr(istr, [arg1, arg2]):
-                return Instr(istr, [self.assign_homes_arg(arg1, home),
-                                    self.assign_homes_arg(arg2, home)])
+                assigned_arg1 = self.assign_homes_arg(arg1, home)
+                assigned_arg2 = self.assign_homes_arg(arg2, home)
+                if assigned_arg2 is None:
+                    return None
+                return Instr(istr, [assigned_arg1, assigned_arg2])
             case Instr(istr, [arg1]):
                 return Instr(istr, [self.assign_homes_arg(arg1, home)])
             case _:
@@ -310,10 +315,16 @@ class Compiler:
     def assign_homes_instrs(
         self, ss: list[instr], home: dict[Variable, arg]
     ) -> list[instr]:
-        return [self.assign_homes_instr(istr, home) for istr in ss]
+        output = []
+        for istr in ss:
+            assigned_istr = self.assign_homes_instr(istr, home)
+            if assigned_istr is None:
+                continue
+            output.append(assigned_istr)
+        return output
 
     def assign_homes(self, p: X86Program) -> X86Program:
-        home, self.stack_space, self.used_callee = self.allocate_registers(p)
+        home = self.allocate_registers(p)
         new_body = dict()
         for block_name, block_items in p.body.items():
             new_body[block_name] = self.assign_homes_instrs(block_items, home)
@@ -329,7 +340,7 @@ class Compiler:
             # TODO
             # L_var
             case Instr(istr, [Deref(reg, offset), Deref(reg2, offset2)]):
-                if reg == reg2 and offset == offset2:
+                if reg == reg2 and offset == offset2 and istr == "movq":
                     return []
                 return [Instr("movq", [Deref(reg, offset), Reg("rax")]),
                         Instr(istr, [Reg("rax"), Deref(reg2, offset2)])]
